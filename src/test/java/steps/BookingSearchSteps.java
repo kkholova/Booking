@@ -12,9 +12,12 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.testng.Assert;
+import pages.BookingSearchPage;
 
 public class BookingSearchSteps {
     private static final String URL = "https://www.booking.com/searchresults.en-gb.html";
+    private BookingSearchPage searchPage;
+//    private static final String RATE_LOCATOR =
     String hotelName;
     String foundHotelName;
     String hotelRate;
@@ -40,8 +43,8 @@ public class BookingSearchSteps {
     @When("User does search")
     public void userDoesSearch() {
         try{
-            driver.findElement(By.id("ss")).sendKeys(hotelName);
-            driver.findElement(By.cssSelector(".sb-submit-helper")).click();
+            searchPage = new BookingSearchPage(driver);
+            searchPage.searchByHotelName(hotelName);
         }catch (ElementNotInteractableException e){
 
             WebElement element = driver.findElement(By.cssSelector(".sb-submit-helper"));
@@ -51,26 +54,37 @@ public class BookingSearchSteps {
 
     }
 
-    @Then("Result page will contain {string}")
-    public void resultPageWillContain(String name) {
+    @Then("Result page will contain {string} with rate {string}")
+    public void resultPageWillContainWithRate(String name, String score) {
         Actions action = new Actions(driver);
         action.moveByOffset(0, 0).click().build().perform();
         foundHotelName = driver.findElement(By.xpath(String.format("//span[contains(text(),'%s')]", name))).getText();
         Assert.assertEquals(foundHotelName, name, "Not found");
-
-    }
-
-    @And("Rate of the hotel will be {string}")
-    public void rateOfTheHotelWillBe(String score) {
-        hotelRate = driver.findElement(By.xpath(String.format("//span[contains(text(),'%s')]//ancestor::div[@class = 'sr_property_block_main_row']//div[@class = 'bui-review-score__badge']", score))).getText();
+        hotelRate = driver.findElement(By.xpath(String.format("//span[contains(text(),'%s')]//ancestor::div[@class = 'sr_property_block_main_row']//div[@class = 'bui-review-score__badge']", name))).getText();
         Assert.assertEquals(hotelRate, score);
-
     }
+
+//    @Then("Result page will contain {string}")
+//    public void resultPageWillContain(String name) {
+//        Actions action = new Actions(driver);
+//        action.moveByOffset(0, 0).click().build().perform();
+//        foundHotelName = driver.findElement(By.xpath(String.format("//span[contains(text(),'%s')]", name))).getText();
+//        Assert.assertEquals(foundHotelName, name, "Not found");
+//
+//    }
+//
+//    @And("Rate of the hotel will be {string}")
+//    public void rateOfTheHotelWillBe(String score) {
+//        hotelRate = driver.findElement(By.xpath(String.format("//span[contains(text(),'%s')]//ancestor::div[@class = 'sr_property_block_main_row']//div[@class = 'bui-review-score__badge']", name))).getText();
+//        Assert.assertEquals(hotelRate, score);
+//
+//    }
 
     @After
     public void tearDown() {
         driver.quit();
     }
+
 
 
 }
